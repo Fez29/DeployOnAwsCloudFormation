@@ -44,10 +44,12 @@ jobs:
     - name: Deploy Entire Notejam Infrastructure
       id: notejamstack
       uses: aws-actions/aws-cloudformation-github-deploy@v1
+      # https://github.com/aws-actions/aws-cloudformation-github-deploy/blob/master/action.yml
       with:
         name: notejam-cluster
         template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
         no-fail-on-empty-changeset: "1"
+        disable-rollback: true
     #     # parameter-overrides: >-
     #     #   AvailabilityZones=${{ github.event.inputs.region }}a,
     #     #   AvailabilityZones=${{ github.event.inputs.region }}c,
