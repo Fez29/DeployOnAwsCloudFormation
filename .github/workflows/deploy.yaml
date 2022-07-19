@@ -43,7 +43,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@master
       with:
         name: ${{ steps.env-name.outputs.environment }}-cluster
-        template: $GITHUB_WORKSPACE/noteJamMaster.yaml
+        template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
         no-fail-on-empty-changeset: "1"
         # parameter-overrides: >-
         #   AvailabilityZones=${{ github.event.inputs.region }}a,
