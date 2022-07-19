@@ -43,7 +43,7 @@ jobs:
       uses: aws-actions/aws-cloudformation-github-deploy@master
       with:
         name: ${{ steps.env-name.outputs.environment }}-cluster
-        template: ${{ github.workspace }}/noteJamMaster.yaml
+        template: $GITHUB_WORKSPACE/noteJamMaster.yaml
         no-fail-on-empty-changeset: "1"
         # parameter-overrides: >-
         #   AvailabilityZones=${{ github.event.inputs.region }}a,
