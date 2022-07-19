@@ -32,20 +32,20 @@ jobs:
         role-session-name: notejamuser-session
         role-duration-seconds: 3599
 
-    - name: Configure environment name
-      id: env-name
-      env:
-        REPO: $GITHUB_REPOSITORY
-      run: |
-        ENVIRONMENT=`echo $REPO | tr "/" "-"`
-        echo "Environment name: $ENVIRONMENT"
-        echo "::set-output name=environment::$ENVIRONMENT"
+    # - name: Configure environment name
+    #   id: env-name
+    #   env:
+    #     REPO: $GITHUB_REPOSITORY
+    #   run: |
+    #     ENVIRONMENT=`echo $REPO | tr "/" "-"`
+    #     echo "Environment name: $ENVIRONMENT"
+    #     echo "::set-output name=environment::$ENVIRONMENT"
 
     - name: Deploy Entire Notejam Infrastructure
       id: notejamstack
       uses: aws-actions/aws-cloudformation-github-deploy@master
       with:
-        name: ${{ steps.env-name.outputs.environment }}-cluster
+        name: notejam-cluster
         template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
         no-fail-on-empty-changeset: "1"
         # parameter-overrides: >-
