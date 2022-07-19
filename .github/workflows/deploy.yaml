@@ -25,7 +25,7 @@ jobs:
       id: creds
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-region: eu-central
+        aws-region: eu-central-1
         role-to-assume: arn:aws:iam::291880462365:role/notejamdemo
         role-session-name: notejamuser-session
 
