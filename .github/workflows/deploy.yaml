@@ -49,7 +49,7 @@ jobs:
         name: notejam-cluster
         template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
         no-fail-on-empty-changeset: "1"
-        disable-rollback: true
+        disable-rollback: "1"
     #     # parameter-overrides: >-
     #     #   AvailabilityZones=${{ github.event.inputs.region }}a,
     #     #   AvailabilityZones=${{ github.event.inputs.region }}c,
