@@ -1,0 +1,275 @@
+Description: "ClimatePartner Non_prod deployment for RDS"
+
+#Check below what is not applicable to Amazon Aurora
+Parameters:
+  rdsEngineValue:
+    Type: String
+    Default: mysql
+    AllowedValues:
+      - aurora
+      - aurora-mysql
+      - aurora-postgresql
+      - mariadb
+      - mysql
+      - oracle-ee
+      - oracle-se2
+      - oracle-se1
+      - oracle-se
+      - postgres
+      - sqlserver-ee
+      - sqlserver-se
+      - sqlserver-ex
+      - sqlserver-web
+    Description: Choose Database engine according to requirement. Default is mysql
+  rdsPort:
+    Type: String
+    Default: 3306
+    Description: The port number on which the database accepts connections. Default is 3306. Not applicable to Amazon Aurora. The daily time range for creating automated backups is managed by the DB cluster.
+  rdsEngineVersion:
+    Type: String
+    Default: 8.0.23
+    Description: Choose Database engine version depending on Engine chosen, there is no default.
+  rdsAutoMinorVersionUpgrade:
+    Type: String
+    Default: true
+    Description: A value that indicates whether minor engine upgrades are applied automatically to the DB instance during the maintenance window. By default, minor engine upgrades are applied automatically.
+  rdsCopyTagsToSnapshot:
+    Type: String
+    Default: true
+    Description: A value that indicates whether to copy tags from the DB instance to snapshots of the DB instance. By default, tags are not copied.
+  rdsDeletionProtection:
+    Type: String
+    Default: true
+    Description: A value that indicates whether the DB instance has deletion protection enabled. The database can't be deleted when deletion protection is enabled. By default, deletion protection is disabled if not specified. Default is set to true.
+  rdsPreferredBackupWindow:
+    Type: String
+    Default: 00:00-08:00
+    Description: The daily time range during which automated backups are created if automated backups are enabled, using the BackupRetentionPeriod parameter. Must be in UTC. Not applicable to Amazon Aurora. The daily time range for creating automated backups is managed by the DB cluster. Default is 00:00-08:00.
+  rdsPreferredMaintenanceWindow:
+    Type: String
+    Default: Sun:23:00-Sun:23:30
+    Description: The weekly time range during which system maintenance can occur, in Universal Coordinated Time (UTC). Minimum 30-minute window. Default is Sun:23:00-Sun:23:30.
+  rdsPubliclyAccessible:
+    Type: String
+    Default: false
+    Description: Indicates whether the DB instance is an internet-facing instance. If you specify true, AWS CloudFormation creates an instance with a publicly resolvable DNS name, which resolves to a public IP address. If you specify false, AWS CloudFormation creates an internal instance with a DNS name that resolves to a private IP address. See https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-publiclyaccessible. Default is set to false.
+  rdsDBInstanceIdentifier:
+    Type: String
+    Default: Test
+    Description: A name for the DB instance. If you specify a name, AWS CloudFormation converts it to lowercase. If you don't specify a name, AWS CloudFormation generates a unique physical ID and uses that ID for the DB instance.
+  rdsDBInstanceClass:
+    Type: String
+    Default: db.t2.micro
+    Description: The compute and memory capacity of the DB instance, for example, db.m4.large. Not all DB instance classes are available in all AWS Regions, or for all database engines. https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.html#Concepts.DBInstanceClass.Types
+  rdsAllocatedStorage:
+    Type: String
+    Default: 100
+    Description: The amount of storage in gibibytes (GiB) to be initially allocated for the database instance. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-allocatedstorage
+  rdsStorageType:
+    Type: String
+    Default: standard
+    AllowedValues:
+      - standard
+      - gp2
+      - io1
+    Description: Specifies the storage type to be associated with the DB instance. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-storagetype
+  rdsMultiAZ:
+    Type: String
+    Default: false
+    Description: Specifies whether the database instance is a Multi-AZ DB instance deployment. You can't set the AvailabilityZone parameter if the MultiAZ parameter is set to true.
+  rdsAllowMajorVersionUpgrade:
+    Type: String
+    Default: true
+    Description: A value that indicates whether major version upgrades are allowed. Changing this parameter doesn't result in an outage and the change is asynchronously applied as soon as possible.
+  rdsStorageEncrypted:
+    Type: String
+    Default: false
+    Description: A value that indicates whether the DB instance is encrypted. By default, it isn't encrypted. Certain instance types do not support encryption
+  rdsDeleteAutomatedBackups:
+    Type: String
+    Default: true
+    Description: A value that indicates whether to remove automated backups immediately after the DB instance is deleted. This parameter isn't case-sensitive. The default is to remove automated backups immediately after the DB instance is deleted. Not applicable to Amazon Aurora.
+  rdsMonitoringInterval:
+    Type: String
+    Default: 0
+    Description: The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collection of Enhanced Monitoring metrics, specify 0. The default is 0.
+  rdsEnableIAMDatabaseAuthentication:
+    Type: String
+    Default: false
+    Description: A value that indicates whether to enable mapping of AWS Identity and Access Management (IAM) accounts to database accounts. By default, mapping is disabled.
+  rdsEnablePerformanceInsights:
+    Type: String
+    Default: false
+    Description: A value that indicates whether to enable Performance Insights for the DB instance. For more information, see Using Amazon Performance Insights in the Amazon RDS User Guide.
+  rdsBackupRetentionPeriod:
+    Type: String
+    Default: 1
+    Description: The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.
+  rdsMasterUsername:
+    Type: String
+    Default: rootuserCP
+    Description: The master user name for the DB instance. Not applicable to Amazon Aurora.
+  rdsDBSubnetGroupName:
+    Type: String
+    Default: dbsubnetgroupName
+    Description: A DB subnet group to associate with the DB instance. If you update this value, the new subnet group must be a subnet group in a new VPC. If there's no DB subnet group, then the DB instance isn't a VPC DB instance. Not applicable to Amazon Aurora.
+  ThisVpc:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-1fcc2f75
+  PrivateSubnetValue1:
+    Type: AWS::EC2::Subnet::Id
+  PrivateSubnetValue2:
+    Type: AWS::EC2::Subnet::Id
+  rdsSecretName:
+    Type: String
+    Description: Name of secret to be created for use in RDS DB
+  TagsKey1:
+    Type: String
+    Default: Division
+  TagsValue1:
+    Type: String
+    Default: ClimatePartner Platforms
+  mySqlDatabase:
+    Type: String
+    Default: notejamdatabase
+
+Resources:
+  rdsDbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Database
+      SubnetIds:
+      - Ref: PrivateSubnetValue1
+      - Ref: PrivateSubnetValue2
+      Tags: 
+      ## Required tags
+      - Key: "Division"
+        Value: "ClimatePartner Platforms"
+    DeletionPolicy: Delete
+  RDSSecretsManager:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Description: AWS RDS admin credentials
+      Name:
+        Ref: rdsSecretName
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "notejamuser"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Tags: 
+      ## Required tags
+      - Key:
+          Ref: TagsKey1
+        Value:
+          Ref: TagsValue1
+    DeletionPolicy: Delete
+  rdsInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access to rds database from within VPC
+      VpcId: 
+        Ref: ThisVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.0.0/0
+      Tags: 
+      ## Required tags
+      - Key:
+          Ref: TagsKey1
+        Value:
+          Ref: TagsValue1
+    DeletionPolicy: Delete
+# aws-activation-engine-dev-mysqldb-ActivationEngineDB-Stack
+# https://activationengine.s3.eu-central-1.amazonaws.com/CloudFormation/RDS/mySqlDatabaseRDS.yaml
+  rdsDBInstance:
+    Type: AWS::RDS::DBInstance
+    DependsOn:
+      - RDSSecretsManager
+      - rdsDbSubnetGroup
+      - rdsInstanceSecurityGroup
+    Properties:
+    #TODO
+      DBName:
+        Ref: mySqlDatabase
+      Engine: 
+        Ref: rdsEngineValue
+      EngineVersion: 
+        Ref: rdsEngineVersion
+      AutoMinorVersionUpgrade: 
+        Ref: rdsAutoMinorVersionUpgrade
+      CopyTagsToSnapshot: 
+        Ref: rdsCopyTagsToSnapshot
+      DeletionProtection: 
+        Ref: rdsDeletionProtection
+      Port: 
+        Ref: rdsPort
+      PreferredBackupWindow: 
+        Ref: rdsPreferredBackupWindow
+      PreferredMaintenanceWindow: 
+        Ref: rdsPreferredMaintenanceWindow
+      PubliclyAccessible: 
+        Ref: rdsPubliclyAccessible
+      DBInstanceIdentifier: 
+        Ref: rdsDBInstanceIdentifier
+      DBInstanceClass: 
+        Ref: rdsDBInstanceClass
+      AllocatedStorage: 
+        Ref: rdsAllocatedStorage
+      StorageType: 
+        Ref: rdsStorageType
+      MultiAZ: 
+        Ref: rdsMultiAZ
+      AllowMajorVersionUpgrade: 
+        Ref: rdsAllowMajorVersionUpgrade
+      StorageEncrypted: 
+        Ref: rdsStorageEncrypted
+      DeleteAutomatedBackups: 
+        Ref: rdsDeleteAutomatedBackups
+      MonitoringInterval: 
+        Ref: rdsMonitoringInterval
+      EnableCloudwatchLogsExports:
+      - error
+      - slowquery
+      EnableIAMDatabaseAuthentication: 
+        Ref: rdsEnableIAMDatabaseAuthentication
+      EnablePerformanceInsights: 
+        Ref: rdsEnablePerformanceInsights
+      BackupRetentionPeriod: 
+        Ref: rdsBackupRetentionPeriod
+      MasterUsername: !Sub '{{resolve:secretsmanager:${RDSSecretsManager}::username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${RDSSecretsManager}::password}}'
+      VPCSecurityGroups:
+      #### Check THIS URGENT
+        - Ref: rdsInstanceSecurityGroup
+      #### Review!!! Must it exist before creation or can we create it
+      DBSubnetGroupName:
+        Ref: rdsDbSubnetGroup
+      # PerformanceInsightsKMSKeyId:
+      Tags: 
+      ## Required tags
+      - Key:
+          Ref: TagsKey1
+        Value:
+          Ref: TagsValue1
+    # Ref: does not work for DeletionPolicy. https://stackoverflow.com/questions/34286395/cloudformation-template-format-error-every-deletionpolicy-member-must-be-a-stri
+    DeletionPolicy: Delete
+
+
+Outputs:
+  DatabaseEndpoint:
+    Description: DatabaseEndpoint value
+    Value: !GetAtt rdsDBInstance.Endpoint.Address
+  DatabasePort:
+    Description: DatabasePort value
+    Value: !GetAtt rdsDBInstance.Endpoint.Port
+  rdsSecretNameValue:
+    Description: SecretName value
+    Value:
+      Ref: rdsSecretName
+  mySqlDatabaseValue:
+    Description: mySqlDatabase value
+    Value:
+      Ref: mySqlDatabase

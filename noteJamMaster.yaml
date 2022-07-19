@@ -1,0 +1,123 @@
+Description: >
+
+    This template creates the following Resources:
+        VPC
+        ECS and LoadBalancer
+        ECR registry
+        RDS database
+        ECS service deployment
+
+Resources:
+    VPC:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/createVpc.yaml
+            Parameters:
+                EnvironmentName: 
+                    Ref: AWS::StackName
+                VpcCIDR: 192.10.0.0/16
+                CIDRPublicSubnet1: 192.10.8.0/21
+                CIDRPublicSubnet2: 192.10.16.0/21
+                CIDRPrivateSubnet1: 192.10.24.0/21
+                CIDRPrivateSubnet2: 192.10.32.0/21
+
+    EcsAndLB:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/ecsAndLB.yaml
+            Parameters:
+                ThisVpc: !GetAtt VPC.Outputs.VPC
+                PublicSubnetOne: !GetAtt VPC.Outputs.PublicSubnet1
+                PublicSubnetTwo: !GetAtt VPC.Outputs.PublicSubnet2
+                PrivateSubnetOne: !GetAtt VPC.Outputs.PrivateSubnet1
+                PrivateSubnetTwo: !GetAtt VPC.Outputs.PrivateSubnet2
+                TagsKey1: Division
+                TagsValue1: ClimatePartner Platforms
+
+    Ecr:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/createEcr.yaml
+            Parameters:
+                ecsRoleValue: !GetAtt EcsAndLB.Outputs.ECSRole
+
+    RDS:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/RDSCreateStack.yaml
+            Parameters:
+                rdsEngineValue: mysql
+                rdsPort: 3306
+                rdsEngineVersion: 8.0.23
+                rdsAutoMinorVersionUpgrade: true
+                rdsCopyTagsToSnapshot: true
+                # rdsDeletionProtection recommended = false to allow deletion in testing
+                rdsDeletionProtection: false
+                rdsPreferredBackupWindow: 00:00-08:00
+                rdsPreferredMaintenanceWindow: Sun:23:00-Sun:23:30
+                rdsPubliclyAccessible: false
+                rdsDBInstanceIdentifier: NoteJamDB
+                rdsDBInstanceClass: db.t2.micro
+                rdsAllocatedStorage: 5
+                rdsStorageType: standard
+                # rdsMultiAZ recommended = true for Production DB
+                rdsMultiAZ: false
+                rdsAllowMajorVersionUpgrade: true
+                # rdsStorageEncrypted recommended = true for Production (requires certain size instances)
+                rdsStorageEncrypted: false
+                rdsDeleteAutomatedBackups: true
+                rdsMonitoringInterval: 0
+                rdsEnableIAMDatabaseAuthentication: false
+                rdsEnablePerformanceInsights: false
+                # rdsBackupRetentionPeriod recommended to be increased for Production
+                rdsBackupRetentionPeriod: 1
+                rdsMasterUsername: notejamuser
+                rdsDBSubnetGroupName: notejamdbsubnetgroup
+                ThisVpc: !GetAtt VPC.Outputs.VPC
+                PrivateSubnetValue1: !GetAtt VPC.Outputs.PrivateSubnet1
+                PrivateSubnetValue2: !GetAtt VPC.Outputs.PrivateSubnet2
+                rdsSecretName: noteJamDb
+                mySqlDatabase: notejamdatabase
+        DeletionPolicy: Delete
+
+    CreateDnsRecords:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/createDns.yaml
+            Parameters:
+                publicLbDnsRecord: !GetAtt EcsAndLB.Outputs.ExternalUrlForDns
+                ThisVpc: !GetAtt VPC.Outputs.VPC
+                HostedZoneName: sensiblebizsolutions.com
+                DnsRecordName: notejamdemo.sensiblebizsolutions.com
+                TagsKey1: Division
+                TagsValue1: ClimatePartner Platforms
+
+    EcsDeploy:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/Infrastructure/ecsServices.yaml
+            Parameters:
+                StackName: notejamstack
+                ServiceName: notejamservice
+                ImageUrl: fez29/testingecsimagenote-jam:v1.official_https_aws
+                ContainerPort: 5000
+                ContainerCpu: 256
+                ContainerMemory: 512
+                Path: "*"
+                Priority: 1
+                DesiredCount: 1
+                Role: !GetAtt EcsAndLB.Outputs.ECSRole
+                ExecutionRoleArn: !GetAtt EcsAndLB.Outputs.ECSTaskExecutionRole
+                ClusterName: !GetAtt EcsAndLB.Outputs.ClusterName
+                FargateContainerSecurityGroup: !GetAtt EcsAndLB.Outputs.FargateContainerSecurityGroup
+                PrivateSubnetOne: !GetAtt VPC.Outputs.PrivateSubnet1
+                PrivateSubnetTwo: !GetAtt VPC.Outputs.PrivateSubnet2
+                ThisVpc: !GetAtt VPC.Outputs.VPC
+                ListenerArn: !GetAtt EcsAndLB.Outputs.PublicListener
+                mySqlUsername: notejamuser
+                mySqlsecretname: !GetAtt RDS.Outputs.rdsSecretNameValue
+                mySqlregionname: eu-central-1
+                mySqlServer: !GetAtt RDS.Outputs.DatabaseEndpoint
+                mySqlPort: 3306
+                AWSDEFAULTREGION: eu-central-1
+                mySqlDatabase: !GetAtt RDS.Outputs.mySqlDatabaseValue

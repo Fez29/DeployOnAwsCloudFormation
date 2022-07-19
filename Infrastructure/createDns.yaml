@@ -1,0 +1,56 @@
+Description: >
+
+Parameters:
+  publicLbDnsRecord:
+    Type: String
+    Default: ''
+    Description: Public LB DNS record
+  ThisVpc:
+    Type: AWS::EC2::VPC::Id
+    Default: ''
+  HostedZoneName:
+    Type: String
+    Default: ''
+  DnsRecordName:
+    Type: String
+    Default: ''
+  TagsKey1:
+    Type: String
+    Default: Division
+  TagsValue1:
+    Type: String
+    Default: ClimatePartner Platforms
+Resources:
+  DNS: 
+    Type: "AWS::Route53::HostedZone"
+    Properties: 
+      HostedZoneConfig: 
+        Comment: 'My public hosted zone'
+      Name:
+        Ref: HostedZoneName
+      # VPCs: 
+      #   - VPCId:
+      #       Ref: ThisVpc
+      #     VPCRegion:
+      #       Ref: AWS::Region
+      HostedZoneTags: 
+      - Key:
+          Ref: TagsKey1
+        Value:
+          Ref: TagsValue1
+  DNSRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId:
+        Ref: DNS
+      Name:
+        Ref: DnsRecordName
+      Type: CNAME
+      TTL: '300'
+      ResourceRecords:
+      - Ref: publicLbDnsRecord
+    DependsOn: DNS
+
+Outputs:
+  DnsRecordForPublicLb:
+    Value: !Join ['', ['https://', !Ref 'DnsRecordName']]
