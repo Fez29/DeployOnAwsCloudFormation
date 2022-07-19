@@ -15,8 +15,8 @@ jobs:
   cluster:
     name: Deploy stack to AWS
     runs-on: ubuntu-latest
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
+    # outputs:
+    #   env-name: ${{ steps.env-name.outputs.environment }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -29,22 +29,22 @@ jobs:
         role-to-assume: arn:aws:iam::291880462365:role/notejamdemo
         role-session-name: notejamuser-session
 
-    - name: Configure environment name
-      id: env-name
-      env:
-        REPO: $GITHUB_REPOSITORY
-      run: |
-        ENVIRONMENT=`echo $REPO | tr "/" "-"`
-        echo "Environment name: $ENVIRONMENT"
-        echo "::set-output name=environment::$ENVIRONMENT"
+    # - name: Configure environment name
+    #   id: env-name
+    #   env:
+    #     REPO: $GITHUB_REPOSITORY
+    #   run: |
+    #     ENVIRONMENT=`echo $REPO | tr "/" "-"`
+    #     echo "Environment name: $ENVIRONMENT"
+    #     echo "::set-output name=environment::$ENVIRONMENT"
 
-    - name: Deploy Entire Notejam Infrastructure
-      id: notejamstack
-      uses: aws-actions/aws-cloudformation-github-deploy@master
-      with:
-        name: ${{ steps.env-name.outputs.environment }}-cluster
-        template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
-        no-fail-on-empty-changeset: "1"
+    # - name: Deploy Entire Notejam Infrastructure
+    #   id: notejamstack
+    #   uses: aws-actions/aws-cloudformation-github-deploy@master
+    #   with:
+    #     name: ${{ steps.env-name.outputs.environment }}-cluster
+    #     template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
+    #     no-fail-on-empty-changeset: "1"
         # parameter-overrides: >-
         #   AvailabilityZones=${{ github.event.inputs.region }}a,
         #   AvailabilityZones=${{ github.event.inputs.region }}c,
