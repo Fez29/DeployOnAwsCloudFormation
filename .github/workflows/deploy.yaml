@@ -41,13 +41,13 @@ jobs:
         echo "Environment name: $ENVIRONMENT"
         echo "::set-output name=environment::$ENVIRONMENT"
 
-    # - name: Deploy Entire Notejam Infrastructure
-    #   id: notejamstack
-    #   uses: aws-actions/aws-cloudformation-github-deploy@master
-    #   with:
-    #     name: notejam-cluster
-    #     template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
-    #     no-fail-on-empty-changeset: "1"
+    - name: Deploy Entire Notejam Infrastructure
+      id: notejamstack
+      uses: aws-actions/aws-cloudformation-github-deploy@v1
+      with:
+        name: notejam-cluster
+        template: https://climatepartner.s3.eu-central-1.amazonaws.com/ClimatePartner/Integrated/noteJamMaster.yaml
+        no-fail-on-empty-changeset: "1"
     #     # parameter-overrides: >-
     #     #   AvailabilityZones=${{ github.event.inputs.region }}a,
     #     #   AvailabilityZones=${{ github.event.inputs.region }}c,
