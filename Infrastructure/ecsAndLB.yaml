@@ -439,22 +439,23 @@ Resources:
             - Effect: Allow
               Action:
                 # Allow the ECS Tasks to download images from ECR
-                - 'ecr:GetAuthorizationToken'
-                - 'ecr:BatchCheckLayerAvailability'
-                - 'ecr:GetDownloadUrlForLayer'
-                - 'ecr:BatchGetImage'
+                - "ecr:GetAuthorizationToken"
+                - "ecr:BatchCheckLayerAvailability"
+                - "ecr:GetDownloadUrlForLayer"
+                - "ecr:BatchGetImage"
                 # Allow access to Secrets Manager
-                - 'secretsmanager:*'
+                - "secretsmanager:*"
                 # Allow the ECS tasks to upload logs to CloudWatch
                 - "logs:DescribeLogStreams"
-                - 'logs:CreateLogStream'
-                - 'logs:PutLogEvents'
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+                - "logs:CreateLogGroup"
                 - "secretsmanager:*"
                 - "ssmmessages:CreateControlChannel"
                 - "ssmmessages:CreateDataChannel"
                 - "ssmmessages:OpenControlChannel"
                 - "ssmmessages:OpenDataChannel"
-              Resource: '*'
+              Resource: "*"
       Tags: 
       ## Required tags
       - Key:
